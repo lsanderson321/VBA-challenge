@@ -1,0 +1,191 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2708
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww30040\viewh17760\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Sub stock_results()\
+        ' Declare the variables\
+        \
+        'Ticker Volume\
+        Dim i As Double\
+        Dim total As Double\
+        Dim ticker_volume As Double\
+        \
+        'Additional Loops for Columns\
+        Dim j As Integer\
+        Dim k As Integer\
+        Dim l As Integer\
+        \
+        'Opening and Closing price\
+        Dim open_price As Double\
+        Dim closing_price As Double\
+        Dim yearly_change As Double\
+        Dim percent_change As Double\
+        \
+        ' Greatest Results\
+        Dim greatest_inc_ticker As String\
+        Dim greatest_inc_value  As Double\
+        \
+        Dim greatest_dec_ticker As String\
+        Dim greatest_dec_value As Double\
+        \
+        Dim greatest_volume_ticker As String\
+        Dim greatest_volume_value As Double\
+        \
+        \
+        'Summary Row\
+        Dim current_ticker As String\
+        Dim next_ticker As String\
+        \
+        Dim summary_row As Integer\
+        \
+        'Dynamic Row Count\
+        Dim last_row As Long\
+        \
+        'Worksheet loop\
+        Dim ws As Worksheet\
+        \
+    For Each ws In ThisWorkbook.Worksheets\
+        \
+    \
+            ' Assign the variables\
+            total = 0\
+            summary_row = 2\
+            open_price = ws.Cells(2, 3).Value\
+            \
+            greatest_inc_value = -9999999999#\
+            greatest_dec_value = 999999999\
+            greatest_volume_value = 0\
+            \
+            last_row = ws.Cells(Rows.Count, 1).End(xlUp).Row\
+            \
+            \
+            'Column headers\
+            ws.Cells(1, 10).Value = "Ticker"\
+            ws.Cells(1, 11).Value = "Yearly Change"\
+            ws.Cells(1, 12).Value = "Percent Change"\
+            ws.Cells(1, 13).Value = "Total Stock Volume"\
+            \
+            \
+            'Do the work\
+            \
+            For i = 2 To last_row\
+            \
+                current_ticker = ws.Cells(i, 1).Value\
+                next_ticker = ws.Cells(i + 1, 1).Value\
+                \
+                 'Add total volume\
+                ticker_volume = ws.Cells(i, 7).Value\
+                total = total + ticker_volume\
+                \
+                'Ticker symbol\
+                If current_ticker <> next_ticker Then\
+                    'Closing price\
+                    closing_price = ws.Cells(i, 6).Value\
+                    yearly_change = closing_price - open_price\
+                    \
+                    'Error Handling\
+                    If open_price = 0 Then\
+                        percent_change = 0\
+                    Else\
+                        percent_change = yearly_change / open_price\
+                    End If\
+                \
+                    'Write the output\
+                    ws.Cells(summary_row, 10).Value = current_ticker\
+                    ws.Cells(summary_row, 11).Value = yearly_change\
+                    ws.Cells(summary_row, 12).Value = percent_change\
+                    ws.Cells(summary_row, 13).Value = total\
+                    ws.Cells(summary_row, 12).NumberFormat = "0.00%"\
+                    \
+                    \
+                    'conditional formattng yearly\
+                    If yearly_change < 0 Then\
+                        ws.Cells(summary_row, 11).Interior.ColorIndex = 3\
+                    Else\
+                        ws.Cells(summary_row, 11).Interior.ColorIndex = 4\
+                    End If\
+                    \
+                    'conditional formatting percent change\
+                    If percent_change < 0 Then\
+                        ws.Cells(summary_row, 12).Interior.ColorIndex = 3\
+                    Else\
+                        ws.Cells(summary_row, 12).Interior.ColorIndex = 4\
+                    End If\
+            \
+                    'reset\
+                    total = 0\
+                    open_price = ws.Cells(i + 1, 3).Value\
+                    \
+                    'increment the summary table row\
+                    summary_row = summary_row + 1\
+                End If\
+            Next i\
+    \
+            For j = 2 To summary_row\
+            \
+                If ws.Cells(j, 12).Value > greatest_inc_value Then\
+                'write over the greatest inc value with new greatest inc value\
+                    greatest_inc_value = ws.Cells(j, 12).Value\
+                    greatest_inc_ticker = ws.Cells(j, 10).Value\
+                \
+                End If\
+                \
+                \
+            Next j\
+            \
+        \
+            'Greatest Table\
+            ws.Cells(1, 17).Value = "Ticker"\
+            ws.Cells(1, 18).Value = "Value"\
+            ws.Cells(2, 16).Value = "Greatest % Increase"\
+            ws.Cells(2, 17).Value = greatest_inc_ticker\
+            ws.Cells(2, 18).Value = greatest_inc_value\
+            ws.Cells(2, 18).NumberFormat = "0.00%"\
+            \
+            'make a percent\
+            ws.Cells(2, 12).NumberFormat = "0.00%"\
+            \
+            \
+            For k = 2 To summary_row\
+            \
+                If ws.Cells(k, 12).Value < greatest_dec_value Then\
+                'write over the greatest dec value with new greatest dec value\
+                    greatest_dec_value = ws.Cells(k, 12).Value\
+                    greatest_dec_ticker = ws.Cells(k, 10).Value\
+                \
+                End If\
+                \
+                \
+            Next k\
+            \
+            'Greatest dec Output\
+            ws.Cells(3, 16).Value = "Greatest % Decrease"\
+            ws.Cells(3, 17).Value = greatest_dec_ticker\
+            ws.Cells(3, 18).Value = greatest_dec_value\
+            ws.Cells(3, 18).NumberFormat = "0.00%"\
+            \
+            \
+            For l = 2 To summary_row\
+            \
+                If ws.Cells(l, 13).Value > greatest_volume_value Then\
+                'write over the greatest vol value with new greatest vol value\
+                    greatest_volume_value = ws.Cells(l, 13).Value\
+                    greatest_volume_ticker = ws.Cells(l, 10).Value\
+                \
+                End If\
+                \
+                \
+            Next l\
+            \
+            'Greatest dec Output\
+            ws.Cells(4, 16).Value = "Greatest Total Volume"\
+            ws.Cells(4, 17).Value = greatest_volume_ticker\
+            ws.Cells(4, 18).Value = greatest_volume_value\
+            \
+     Next ws\
+\
+End Sub\
+                }
